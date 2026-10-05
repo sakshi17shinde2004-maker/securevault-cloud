@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SecureVault Cloud</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="css/style.css" rel="stylesheet">
+</head>
+<body>
+<div id="toast-area"></div>
+
+<!-- ===== Sign in / Register ===== -->
+<section id="auth-view" class="container">
+  <div class="card auth-card shadow-sm">
+    <div class="card-body p-4">
+      <h1 class="h4 brand mb-1">SecureVault Cloud</h1>
+      <p class="text-muted small mb-3">Your private file vault.</p>
+      <ul class="nav nav-pills mb-3">
+        <li class="nav-item"><button class="nav-link active" data-auth="login">Sign in</button></li>
+        <li class="nav-item"><button class="nav-link" data-auth="register">Create account</button></li>
+      </ul>
+      <div id="auth-error" class="alert alert-danger py-2 d-none"></div>
+      <form id="login-form">
+        <div class="mb-3"><label class="form-label">Username or email</label><input id="login-user" class="form-control" autocomplete="username" required></div>
+        <div class="mb-3"><label class="form-label">Password</label><input id="login-pass" type="password" class="form-control" autocomplete="current-password" required></div>
+        <button class="btn btn-sv w-100">Sign in</button>
+      </form>
+      <form id="register-form" class="d-none">
+        <div class="mb-3"><label class="form-label">Username</label><input id="reg-user" class="form-control" pattern="[A-Za-z0-9_]{3,30}" title="3-30 letters, digits or underscore" required></div>
+        <div class="mb-3"><label class="form-label">Email</label><input id="reg-email" type="email" class="form-control" required></div>
+        <div class="mb-3"><label class="form-label">Password</label><input id="reg-pass" type="password" class="form-control" minlength="8" autocomplete="new-password" required>
+          <div class="form-text">At least 8 characters, with a letter and a digit.</div></div>
+        <button class="btn btn-sv w-100">Create account</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Main app ===== -->
+<section id="app-view" class="d-none">
+  <nav class="navbar navbar-dark navbar-sv px-3">
+    <span class="navbar-brand brand mb-0">SecureVault Cloud</span>
+    <div class="d-flex align-items-center gap-3 text-white">
+      <span id="who" class="small"></span>
+      <button id="logout" class="btn btn-outline-light btn-sm">Sign out</button>
+    </div>
+  </nav>
+
+  <div class="container py-4">
+    <div class="card shadow-sm mb-3"><div class="card-body py-3">
+      <div class="d-flex justify-content-between small mb-1"><span>Storage</span><span id="quota-text"></span></div>
+      <div class="progress" style="height:10px"><div id="quota-bar" class="progress-bar bg-success" style="width:0%"></div></div>
+    </div></div>
+
+    <ul class="nav nav-pills mb-3" id="main-nav">
+      <li class="nav-item"><button class="nav-link active" data-tab="files">My files</button></li>
+      <li class="nav-item"><button class="nav-link" data-tab="vault">Secure vault</button></li>
+      <li class="nav-item"><button class="nav-link" data-tab="trash">Recycle bin</button></li>
+      <li class="nav-item"><button class="nav-link" data-tab="logs">Activity</button></li>
+      <li class="nav-item d-none" id="admin-nav"><button class="nav-link" data-tab="admin">Admin</button></li>
+    </ul>
+
+    <!-- My files -->
+    <div class="tab-section" id="tab-files">
+      <div class="card shadow-sm mb-3"><div class="card-body">
+        <form id="upload-form" class="row g-2 align-items-end">
+          <div class="col-md-6"><label class="form-label">Upload a file</label>
+            <input type="file" id="upload-file" class="form-control" required></div>
+          <div class="col-md-3"><div class="form-check"><input class="form-check-input" type="checkbox" id="upload-dup">
+            <label class="form-check-label small" for="upload-dup">Allow duplicate</label></div></div>
+          <div class="col-md-3"><button class="btn btn-sv w-100">Upload</button></div>
+        </form>
+        <div class="form-text">Allowed: PDF, TXT, CSV, DOCX, XLSX, PPTX, PNG, JPG, GIF, ZIP.</div>
+      </div></div>
+      <div class="row g-2 mb-2">
+        <div class="col-md-6"><input id="search" class="form-control" placeholder="Search by file name"></div>
+        <div class="col-md-3"><select id="cat" class="form-select"><option value="">All categories</option>
+          <option>Documents</option><option>Images</option><option>Archives</option></select></div>
+      </div>
+      <div class="card shadow-sm"><div class="table-responsive"><table class="table table-hover mb-0">
+        <thead><tr><th>Name</th><th>Type</th><th>Size</th><th>Version</th><th>Uploaded</th><th class="text-end">Actions</th></tr></thead>
+        <tbody id="files-body"></tbody></table></div></div>
+    </div>
+
+    <!-- Vault -->
+    <div class="tab-section d-none" id="tab-vault">
+      <div id="vault-setup" class="card shadow-sm d-none"><div class="card-body">
+        <h2 class="h5">Create your Vault PIN</h2>
+        <p class="text-muted small">Choose 4 to 8 digits. You will need it every time you open the vault.</p>
+        <form id="vault-setup-form" class="row g-2">
+          <div class="col-md-4"><input id="setup-pin" type="password" inputmode="numeric" pattern="\d{4,8}" class="form-control" placeholder="PIN" required></div>
+          <div class="col-md-4"><input id="setup-pin2" type="password" inputmode="numeric" pattern="\d{4,8}" class="form-control" placeholder="Repeat PIN" required></div>
+          <div class="col-md-4"><button class="btn btn-sv w-100">Create PIN</button></div>
+        </form></div></div>
+      <div id="vault-locked" class="card shadow-sm d-none"><div class="card-body">
+        <h2 class="h5">Vault is locked</h2>
+        <form id="vault-unlock-form" class="row g-2">
+          <div class="col-md-4"><input id="unlock-pin" type="password" inputmode="numeric" class="form-control" placeholder="Vault PIN" required></div>
+          <div class="col-md-3"><button class="btn btn-sv w-100">Unlock</button></div>
+        </form></div></div>
+      <div id="vault-open" class="d-none">
+        <div class="card shadow-sm mb-3"><div class="card-body">
+          <div class="d-flex justify-content-between mb-2"><h2 class="h5 mb-0">Vault is open</h2>
+            <button id="vault-lock" class="btn btn-outline-secondary btn-sm">Lock vault</button></div>
+          <form id="vault-upload-form" class="row g-2 align-items-end">
+            <div class="col-md-9"><input type="file" id="vault-file" class="form-control" required></div>
+            <div class="col-md-3"><button class="btn btn-sv w-100">Upload to vault</button></div>
+          </form></div></div>
+        <div class="card shadow-sm"><div class="table-responsive"><table class="table table-hover mb-0">
+          <thead><tr><th>Name</th><th>Type</th><th>Size</th><th>Version</th><th>Uploaded</th><th class="text-end">Actions</th></tr></thead>
+          <tbody id="vault-body"></tbody></table></div></div>
+      </div>
+    </div>
+
+    <!-- Trash -->
+    <div class="tab-section d-none" id="tab-trash">
+      <p class="text-muted small">Deleted files stay here and do not use your storage. Restore them or delete them forever.</p>
+      <div class="card shadow-sm"><div class="table-responsive"><table class="table table-hover mb-0">
+        <thead><tr><th>Name</th><th>Type</th><th>Size</th><th>Deleted</th><th class="text-end">Actions</th></tr></thead>
+        <tbody id="trash-body"></tbody></table></div></div>
+    </div>
+
+    <!-- Activity -->
+    <div class="tab-section d-none" id="tab-logs">
+      <div class="card shadow-sm"><div class="table-responsive"><table class="table table-sm mb-0">
+        <thead><tr><th>Time</th><th>Action</th><th>Details</th><th>IP</th></tr></thead>
+        <tbody id="logs-body"></tbody></table></div></div>
+    </div>
+
+    <!-- Admin -->
+    <div class="tab-section d-none" id="tab-admin">
+      <div class="row g-3 mb-3" id="admin-stats"></div>
+      <div class="card shadow-sm mb-3"><div class="card-header">Users</div><div class="table-responsive"><table class="table mb-0">
+        <thead><tr><th>User</th><th>Role</th><th>Files</th><th>Used / Quota</th><th>Status</th><th class="text-end">Actions</th></tr></thead>
+        <tbody id="admin-users"></tbody></table></div></div>
+      <div class="card shadow-sm"><div class="card-header">All activity</div><div class="table-responsive"><table class="table table-sm mb-0">
+        <thead><tr><th>Time</th><th>User</th><th>Action</th><th>Details</th><th>IP</th></tr></thead>
+        <tbody id="admin-logs"></tbody></table></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- Modal -->
+<div class="modal fade" id="modal" tabindex="-1"><div class="modal-dialog modal-lg"><div class="modal-content">
+  <div class="modal-header"><h2 class="modal-title h5" id="modal-title"></h2><button class="btn-close" data-bs-dismiss="modal"></button></div>
+  <div class="modal-body" id="modal-body"></div>
+</div></div></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

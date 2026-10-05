@@ -1,0 +1,14 @@
+:root { --sv-ink:#1f2a37; --sv-accent:#0f766e; --sv-bg:#f4f6f8; }
+body { background: var(--sv-bg); color: var(--sv-ink); font-family: "Segoe UI", system-ui, -apple-system, sans-serif; }
+.brand { font-weight: 700; letter-spacing: .2px; }
+.navbar-sv { background: var(--sv-ink); }
+.btn-sv { background: var(--sv-accent); border-color: var(--sv-accent); color: #fff; }
+.btn-sv:hover { background: #0b5f58; border-color: #0b5f58; color: #fff; }
+.nav-pills .nav-link { color: var(--sv-ink); }
+.nav-pills .nav-link.active { background: var(--sv-accent); }
+.auth-card { max-width: 420px; margin: 8vh auto; }
+.table td, .table th { vertical-align: middle; }
+.file-name { max-width: 320px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hash { font-family: Consolas, monospace; font-size: .8rem; }
+#toast-area { position: fixed; top: 12px; right: 12px; z-index: 2000; width: 340px; max-width: 92vw; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
